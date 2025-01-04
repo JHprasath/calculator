@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="calculator.css">
+    <title>Calculator</title>
+</head>
+<body>
+    <div class="container">
+        <div class="calculator">
+            <h1>CALCULATOR</h1>
+            <input type="text" placeholder="0" id="output-screen" readonly>
+            <button onclick="clearScreen()" style="background-color: red;">CL</button>
+            <button onclick="deleteLast()" style="background-color: red;">DEL</button>
+            <button onclick="appendToScreen('%')">%</button>
+            <button onclick="appendToScreen('/')">/</button>
+            <button onclick="appendToScreen('7')">7</button>
+            <button onclick="appendToScreen('8')">8</button>
+            <button onclick="appendToScreen('9')">9</button>
+            <button onclick="appendToScreen('*')">*</button>
+            <button onclick="appendToScreen('4')">4</button>
+            <button onclick="appendToScreen('5')">5</button>
+            <button onclick="appendToScreen('6')">6</button>
+            <button onclick="appendToScreen('-')">-</button>
+            <button onclick="appendToScreen('1')">1</button>
+            <button onclick="appendToScreen('2')">2</button>
+            <button onclick="appendToScreen('3')">3</button>
+            <button onclick="appendToScreen('+')">+</button>
+            <button onclick="appendToScreen('.')">.</button>
+            <button onclick="appendToScreen('0')">0</button>
+            <button onclick="calculate()" class="equal">=</button>
+        </div>
+    </div>
+    <script>
+        let outputScreen = document.getElementById("output-screen");
+
+// Function to append values to the screen
+function appendToScreen(value) {
+    outputScreen.value += value;
+}
+
+// Function to clear the screen
+function clearScreen() {
+    outputScreen.value = "";
+}
+
+// Function to delete the last character
+function deleteLast() {
+    outputScreen.value = outputScreen.value.slice(0, -1);
+}
+
+// Function to calculate the result
+function calculate() {
+    try {
+        let expression = outputScreen.value;
+        let result = evaluateExpression(expression);
+        outputScreen.value = result;
+    } catch (error) {
+        outputScreen.value = "Error";
+    }
+}
+
+// Function to evaluate the expression
+function evaluateExpression(expression) {
+    let tokens = expression.match(/\d+\.?\d*|[\+\-\*\/%]/g) || [];
+    let numbers = [];
+    let operators = [];
+    
+    // Precedence of operators
+    const precedence = {
+        '+': 1,
+        '-': 1,
+        '*': 2,
+        '/': 2,
+        '%': 2
+    };
+
+    // Helper function to perform operations
+    function applyOperation(a, b, operator) {
+        switch (operator) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case '*': return a * b;
+            case '/': return a / b;
+            case '%': return a % b;
+            default: throw new Error("Unknown operator");
+        }
+    }
+
+    
+
+    // Process each token
+    tokens.forEach(token => {
+        if (!isNaN(token)) {
+            numbers.push(parseFloat(token));
+        } else {
+            while (operators.length > 0 && precedence[operators[operators.length - 1]] >= precedence[token]) {
+                let b = numbers.pop();
+                let a = numbers.pop();
+                let op = operators.pop();
+                numbers.push(applyOperation(a, b, op));
+            }
+            operators.push(token);
+        }
+    });
+
+    // Process remaining operators
+    while (operators.length > 0) {
+        let b = numbers.pop();
+        let a = numbers.pop();
+        let op = operators.pop();
+        numbers.push(applyOperation(a, b, op));
+    }
+
+    return numbers.pop();
+}
+    </script>
+</body>
+</html>
